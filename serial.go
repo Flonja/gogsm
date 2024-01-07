@@ -9,6 +9,9 @@ func FromSerial(port string) (GSMDevice, error) {
 	if err != nil {
 		return nil, err
 	}
-	_ = serialPort
-	return &DefaultGSMDevice{serialPort}, nil
+	device, err := NewGSMDevice(serialPort)
+	if err != nil {
+		return nil, err
+	}
+	return device, nil
 }
