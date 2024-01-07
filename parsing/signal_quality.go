@@ -18,7 +18,7 @@ func (s SignalQualityString) Parsed() (sq SignalQuality, err error) {
 	if err != nil {
 		return
 	}
-	ber, err := strconv.Atoi(signal[0])
+	ber, err := strconv.Atoi(signal[1])
 	if err != nil {
 		return
 	}
