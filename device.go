@@ -31,6 +31,12 @@ type GSMDevice interface {
 	ProductIdentification() (string, error)
 	// Capabilities returns a list of the capabilities this GSM module may have.
 	Capabilities() ([]parsing.CommandSetCapability, error)
+	// CharacterSet returns the current character set selected.
+	CharacterSet() (parsing.CharacterSet, error)
+	// SetCharacterSet sets the current character set to the provided one.
+	SetCharacterSet(set parsing.CharacterSet) error
+	// NetworkOperator returns the current network operator providing service to the GSM module.
+	NetworkOperator() (string, error)
 }
 
 func NewGSMDevice(socket io.ReadWriter) (GSMDevice, error) {

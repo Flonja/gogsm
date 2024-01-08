@@ -15,6 +15,8 @@ func main() {
 	fmt.Printf("%#v\n", must(gsmDevice.ProductIdentification()))
 	fmt.Printf("%#v\n", must(gsmDevice.SubscriberId()))
 	fmt.Printf("%#v\n", must(gsmDevice.Capabilities()))
+	fmt.Printf("%v\n", must(gsmDevice.CharacterSet()))
+	fmt.Printf("%v\n", must(gsmDevice.NetworkOperator()))
 }
 
 func must[T any](t T, err error) T {

@@ -3,6 +3,7 @@ package parsing
 import (
 	"encoding/hex"
 	"github.com/warthog618/sms/encoding/ucs2"
+	"regexp"
 	"strconv"
 	"strings"
 	"unicode/utf16"
@@ -62,4 +63,10 @@ func (s EncodedString) ToAsciiString() (s1 EncodedString) {
 		s1 += EncodedString(strconv.Itoa(int(i)))
 	}
 	return
+}
+
+var quotesRegex = regexp.MustCompile(`"(.*)"`)
+
+func (s EncodedString) RemoveQuotes() EncodedString {
+	return EncodedString(quotesRegex.ReplaceAllString(string(s), "$1"))
 }

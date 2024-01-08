@@ -1,6 +1,7 @@
 package gogsm
 
 import (
+	"errors"
 	"fmt"
 	"github.com/flonja/gogsm/parsing"
 )
@@ -66,20 +67,48 @@ func (d *DefaultGSMDevice) ProductIdentification() (string, error) {
 	return d.executeSimpleCommand("I")
 }
 
+func (d *DefaultGSMDevice) CharacterSet() (parsing.CharacterSet, error) {
+	resp, err := d.getCommand("+CSCS")
+	if err != nil {
+		return parsing.GSM7BitCharacterSet, err
+	}
+	return parsing.CharacterSetFromString(resp), nil
+}
+
+func (d *DefaultGSMDevice) SetCharacterSet(set parsing.CharacterSet) error {
+	return d.setCommand("+CSCS", fmt.Sprintf(`"%s"`, set))
+}
+
+func (d *DefaultGSMDevice) NetworkOperator() (string, error) {
+	parts, err := mapped(split(","), wrap(d.getCommand("+COPS"))...)
+	if err != nil {
+		return "", err
+	}
+	if len(parts) < 2 {
+		return "", errors.New("no operator found")
+	}
+	return string(parsing.EncodedString(parts[2]).RemoveQuotes()), nil
+}
+
 // Utilities:
 func (d *DefaultGSMDevice) testCommand(cmd string) error {
-	_, err := d.executeSimpleCommand(fmt.Sprintf("%v=?", cmd))
+	_, err := d.executeCommand(cmd, "=?")
 	return err
 }
 
 func (d *DefaultGSMDevice) getCommand(cmd string) (string, error) {
-	return d.executeSimpleCommand(fmt.Sprintf("%v?", cmd))
+	return d.executeCommand(cmd, "?")
 }
 
-func (d *DefaultGSMDevice) setCommand(cmd string, value string) (string, error) {
-	return d.executeSimpleCommand(fmt.Sprintf("%v=%v", cmd, value))
+func (d *DefaultGSMDevice) setCommand(cmd string, value string) error {
+	_, err := d.executeCommand(cmd, fmt.Sprintf("=%v", value))
+	return err
 }
 
 func (d *DefaultGSMDevice) executeSimpleCommand(cmd string) (string, error) {
-	return mapped(replace(fmt.Sprintf("%v: ", cmd)), wrap(d.ExecuteCommand(fmt.Sprintf("AT%v", cmd)))...)
+	return d.executeCommand(cmd, "")
+}
+
+func (d *DefaultGSMDevice) executeCommand(cmd string, extras string) (string, error) {
+	return mapped(replace(fmt.Sprintf("%v: ", cmd)), wrap(d.ExecuteCommand(fmt.Sprintf("AT%v%v", cmd, extras)))...)
 }
