@@ -6,13 +6,20 @@ import (
 )
 
 func main() {
-	gsmDevice, err := gogsm.FromSerial("/dev/ttyUSB2")
-	if err != nil {
-		return
-	}
-	resp, err := gsmDevice.SignalQuality()
-	if err != nil {
-		return
-	}
+	gsmDevice := must(gogsm.FromSerial("/dev/ttyUSB2"))
+	resp := must(gsmDevice.SignalQuality())
 	fmt.Println(resp.DBM.Description()) // Excellent
+	fmt.Printf("%#v\n", must(gsmDevice.Model()))
+	fmt.Printf("%#v\n", must(gsmDevice.Manufacturer()))
+	fmt.Printf("%#v\n", must(gsmDevice.Revision()))
+	fmt.Printf("%#v\n", must(gsmDevice.ProductIdentification()))
+	fmt.Printf("%#v\n", must(gsmDevice.SubscriberId()))
+	fmt.Printf("%#v\n", must(gsmDevice.Capabilities()))
+}
+
+func must[T any](t T, err error) T {
+	if err != nil {
+		panic(err)
+	}
+	return t
 }

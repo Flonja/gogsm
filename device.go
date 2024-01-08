@@ -12,11 +12,25 @@ type GSMDevice interface {
 	io.ReadWriter
 	io.StringWriter
 
-	// Check sends a basic "AT" command to see if the device is operational
+	// Check sends a basic "AT" command to see if the device is operational.
 	Check() error
-	// SignalQuality sends a basic "AT+CSQ" command to
-	// report rssi (https://en.wikipedia.org/wiki/RSSI) and ber (https://en.wikipedia.org/wiki/Bit_error_rate)
+	// SignalQuality returns the current signal quality by values:
+	// RSSI (https://en.wikipedia.org/wiki/RSSI) and BER (https://en.wikipedia.org/wiki/Bit_error_rate).
 	SignalQuality() (parsing.SignalQuality, error)
+	// Model returns the model of the GSM module.
+	Model() (string, error)
+	// Manufacturer returns the manufacturer of the GSM module.
+	Manufacturer() (string, error)
+	// Revision returns the revision of the GSM module.
+	Revision() (string, error)
+	// SerialNumber returns the serial number of the GSM module.
+	SerialNumber() (string, error)
+	// SubscriberId returns the IMSI (International Mobile Subscriber Identity) of the SIM inserted into the GSM module.
+	SubscriberId() (string, error)
+	// ProductIdentification sends a basic "ATI" command for product identification information.
+	ProductIdentification() (string, error)
+	// Capabilities returns a list of the capabilities this GSM module may have.
+	Capabilities() ([]parsing.CommandSetCapability, error)
 }
 
 func NewGSMDevice(socket io.ReadWriter) (GSMDevice, error) {
