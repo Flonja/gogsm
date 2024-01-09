@@ -98,11 +98,11 @@ func (d *DefaultGSMDevice) SetPreferredMessageStorage(storage parsing.MessageSto
 func (d *DefaultGSMDevice) MessageFormat() (parsing.MessageFormat, error) {
 	messageFormatRaw, err := d.getCommand("+CMGF")
 	if err != nil {
-		return parsing.PDU, err
+		return parsing.PDUMessageFormat, err
 	}
 	messageFormat, err := strconv.Atoi(messageFormatRaw)
 	if err != nil {
-		return parsing.PDU, err
+		return parsing.PDUMessageFormat, err
 	}
 	return parsing.MessageFormat(messageFormat), nil
 }

@@ -1,8 +1,8 @@
 package parsing
 
 const (
-	PDU MessageFormat = iota
-	Text
+	PDUMessageFormat MessageFormat = iota
+	TextMessageFormat
 )
 
 type MessageFormat uint8
