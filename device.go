@@ -37,6 +37,12 @@ type GSMDevice interface {
 	SetCharacterSet(set parsing.CharacterSet) error
 	// NetworkOperator returns the current network operator providing service to the GSM module.
 	NetworkOperator() (string, error)
+	// SetPreferredMessageStorage sets the preferred message storage for incoming SMS/MMS messages.
+	SetPreferredMessageStorage(storage parsing.MessageStorage) error
+	// MessageFormat returns the message format used to encode/decode SMS/MMS messages.
+	MessageFormat() (parsing.MessageFormat, error)
+	// SetMessageFormat sets the message format used to encode/decode SMS/MMS messages.
+	SetMessageFormat(format parsing.MessageFormat) error
 }
 
 func NewGSMDevice(socket io.ReadWriter) (GSMDevice, error) {
