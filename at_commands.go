@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/flonja/gogsm/parsing"
 	"strconv"
+	"strings"
 )
 
 func (d *DefaultGSMDevice) Check() error {
@@ -112,16 +113,7 @@ func (d *DefaultGSMDevice) SetMessageFormat(format parsing.MessageFormat) error 
 }
 
 func (d *DefaultGSMDevice) SMSMessages(storage parsing.MessageStorage, filter parsing.MessageFilter) ([]parsing.SMSMessage, error) {
-	if err := d.SetMessageFormat(parsing.TextMessageFormat); err != nil {
-		return nil, err
-	}
-	if err := d.SetCharacterSet(parsing.UCS2CharacterSet); err != nil {
-		return nil, err
-	}
-	if err := d.SetPreferredMessageStorage(storage); err != nil {
-		return nil, err
-	}
-	if err := d.setCommand("+CSDH", fmt.Sprintf("%d", 1)); err != nil {
+	if err := d.setupSMSMessages(storage); err != nil {
 		return nil, err
 	}
 	messages, err := d.ExecuteCommand(fmt.Sprintf(`AT+CMGL="%v"`, filter))
@@ -131,11 +123,46 @@ func (d *DefaultGSMDevice) SMSMessages(storage parsing.MessageStorage, filter pa
 	if len(messages) == 0 {
 		return nil, nil
 	}
-	smsMessages, err := parsing.SMSMessagesString(messages).Parsed()
+	smsMessages, err := parsing.SMSMessagesString(messages).Parsed("+CMGL")
 	if err != nil {
 		return nil, err
 	}
 	return smsMessages, nil
+}
+
+func (d *DefaultGSMDevice) SMSMessage(storage parsing.MessageStorage, index int) (parsing.SMSMessage, error) {
+	if err := d.setupSMSMessages(storage); err != nil {
+		return parsing.SMSMessage{}, err
+	}
+	messages, err := d.ExecuteCommand(fmt.Sprintf(`AT+CMGR=%v`, index))
+	if err != nil {
+		return parsing.SMSMessage{}, err
+	}
+	if len(messages) == 0 {
+		return parsing.SMSMessage{}, nil
+	}
+	messages = strings.Replace(messages, "+CMGR: ", fmt.Sprintf("+CMGR: %v,", index), 1) // Small hack, I know
+	smsMessages, err := parsing.SMSMessagesString(messages).Parsed("+CMGR")
+	if err != nil {
+		return parsing.SMSMessage{}, err
+	}
+	return smsMessages[0], nil
+}
+
+func (d *DefaultGSMDevice) setupSMSMessages(storage parsing.MessageStorage) error {
+	if err := d.SetMessageFormat(parsing.TextMessageFormat); err != nil {
+		return err
+	}
+	if err := d.SetCharacterSet(parsing.UCS2CharacterSet); err != nil {
+		return err
+	}
+	if err := d.SetPreferredMessageStorage(storage); err != nil {
+		return err
+	}
+	if err := d.setCommand("+CSDH", fmt.Sprintf("%d", 1)); err != nil {
+		return err
+	}
+	return nil
 }
 
 // Utilities:

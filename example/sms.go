@@ -16,6 +16,10 @@ func main() {
 		fmt.Println(message.Text)
 		fmt.Println()
 	}
+	message := mustComplete(gsmDevice.SMSMessage(parsing.SimMessageStorage, 2))
+	fmt.Printf("Specific message on index %v from %v (%v): Sent at %v\n", 2, message.Sender, message.PhoneNumberType, message.Time.Format(time.DateTime))
+	fmt.Println(message.Text)
+	fmt.Println()
 }
 
 func mustComplete[T any](t T, err error) T {

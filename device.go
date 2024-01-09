@@ -45,6 +45,8 @@ type GSMDevice interface {
 	SetMessageFormat(format parsing.MessageFormat) error
 	// SMSMessages returns all messages from the provided parsing.MessageStorage with the parsing.MessageFilter.
 	SMSMessages(storage parsing.MessageStorage, filter parsing.MessageFilter) ([]parsing.SMSMessage, error)
+	// SMSMessage returns all messages from the provided parsing.MessageStorage with the index given.
+	SMSMessage(storage parsing.MessageStorage, index int) (parsing.SMSMessage, error)
 }
 
 func NewGSMDevice(socket io.ReadWriter) (GSMDevice, error) {

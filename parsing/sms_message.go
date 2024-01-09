@@ -11,11 +11,11 @@ import (
 
 type SMSMessagesString string
 
-func (s SMSMessagesString) Parsed() (messages []SMSMessage, err error) {
+func (s SMSMessagesString) Parsed(prefix string) (messages []SMSMessage, err error) {
 	list := strings.Split(string(s), "\r\n")
 	for i := 0; i < len(list); i += 2 {
 		parts := strings.Split(strings.TrimPrefix(
-			strings.ReplaceAll(list[i], "\n", ""), "+CMGL: "), ",")
+			strings.ReplaceAll(list[i], "\n", ""), prefix+": "), ",")
 		msg := SMSMessage{}
 
 		msg.Index, err = strconv.Atoi(parts[0])
