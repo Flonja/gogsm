@@ -36,5 +36,5 @@ func MessageStorageFromString(s string) MessageStorage {
 	case "MT":
 		return AllMessageStorage
 	}
-	panic(fmt.Errorf("unknown character set: %v", s))
+	panic(fmt.Errorf("unknown message storage: %v", s))
 }
