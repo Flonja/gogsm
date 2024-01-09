@@ -17,6 +17,7 @@ func main() {
 	fmt.Printf("%#v\n", must(gsmDevice.Capabilities()))
 	fmt.Printf("%v\n", must(gsmDevice.CharacterSet()))
 	fmt.Printf("%v\n", must(gsmDevice.NetworkOperator()))
+	fmt.Printf("%v\n", must(gsmDevice.MessageFormat()))
 }
 
 func must[T any](t T, err error) T {

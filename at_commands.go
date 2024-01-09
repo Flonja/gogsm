@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/flonja/gogsm/parsing"
+	"strconv"
 )
 
 func (d *DefaultGSMDevice) Check() error {
@@ -88,6 +89,26 @@ func (d *DefaultGSMDevice) NetworkOperator() (string, error) {
 		return "", errors.New("no operator found")
 	}
 	return string(parsing.EncodedString(parts[2]).RemoveQuotes()), nil
+}
+
+func (d *DefaultGSMDevice) SetPreferredMessageStorage(storage parsing.MessageStorage) error {
+	return d.setCommand("+CPMS", fmt.Sprintf(`"%s","%s","%s"`, storage, parsing.SimMessageStorage, parsing.SimMessageStorage))
+}
+
+func (d *DefaultGSMDevice) MessageFormat() (parsing.MessageFormat, error) {
+	messageFormatRaw, err := d.getCommand("+CMGF")
+	if err != nil {
+		return parsing.PDU, err
+	}
+	messageFormat, err := strconv.Atoi(messageFormatRaw)
+	if err != nil {
+		return parsing.PDU, err
+	}
+	return parsing.MessageFormat(messageFormat), nil
+}
+
+func (d *DefaultGSMDevice) SetMessageFormat(format parsing.MessageFormat) error {
+	return d.setCommand("+CMGF", fmt.Sprintf("%d", format))
 }
 
 // Utilities:
