@@ -20,6 +20,13 @@ func main() {
 	fmt.Printf("Specific message on index %v from %v (%v): Sent at %v\n", 2, message.Sender, message.PhoneNumberType, message.Time.Format(time.DateTime))
 	fmt.Println(message.Text)
 	fmt.Println()
+	select {
+	case msg := <-gsmDevice.IncomingSMSMessage():
+		fmt.Printf("Incoming SMS message from %v (%v): Sent at %v\n", msg.Sender, msg.PhoneNumberType, msg.Time.Format(time.DateTime))
+		fmt.Println(msg.Text)
+		fmt.Println()
+		return
+	}
 }
 
 func mustComplete[T any](t T, err error) T {

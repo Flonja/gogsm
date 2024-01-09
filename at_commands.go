@@ -8,6 +8,10 @@ import (
 	"strings"
 )
 
+func (d *DefaultGSMDevice) IncomingSMSMessage() <-chan parsing.SMSMessage {
+	return d.incomingSMSMessages
+}
+
 func (d *DefaultGSMDevice) Check() error {
 	_, err := d.ExecuteCommand("AT")
 	return err

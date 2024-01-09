@@ -5,12 +5,15 @@ import (
 	"fmt"
 	"github.com/flonja/gogsm/parsing"
 	"io"
+	"strconv"
 	"strings"
+	"time"
 )
 
 type GSMDevice interface {
-	io.ReadWriter
-	io.StringWriter
+	io.Closer
+
+	IncomingSMSMessage() <-chan parsing.SMSMessage
 
 	// Check sends a basic "AT" command to see if the device is operational.
 	Check() error
@@ -49,38 +52,81 @@ type GSMDevice interface {
 	SMSMessage(storage parsing.MessageStorage, index int) (parsing.SMSMessage, error)
 }
 
-func NewGSMDevice(socket io.ReadWriter) (GSMDevice, error) {
-	dev := &DefaultGSMDevice{socket: socket}
+func NewGSMDevice(socket io.ReadWriteCloser) (GSMDevice, error) {
+	dev := &DefaultGSMDevice{socket: socket, incomingSMSMessages: make(chan parsing.SMSMessage)}
 	if err := dev.Check(); err != nil {
 		return nil, err
 	}
+	go dev.watch()
 	return dev, nil
 }
 
 type DefaultGSMDevice struct {
-	socket io.ReadWriter
+	closed bool
+	socket io.ReadWriteCloser
+
+	executingCommand    bool
+	incomingSMSMessages chan parsing.SMSMessage
 }
 
-func (d *DefaultGSMDevice) Read(p []byte) (n int, err error) {
-	return d.socket.Read(p)
+func (d *DefaultGSMDevice) watch() error {
+	for !d.closed {
+		time.Sleep(time.Second * 5)
+		if d.executingCommand {
+			continue
+		}
+
+		buf := make([]byte, 256)
+		n, err := d.socket.Read(buf)
+		if err != nil {
+			return err
+		}
+		out := strings.TrimSpace(string(buf[:n]))
+		if argsStr, ok := strings.CutPrefix(out, "+CMTI: "); ok {
+			args := strings.Split(argsStr, ",")
+			storage := parsing.MessageStorageFromString(args[0])
+			index, err := strconv.Atoi(args[1])
+			if err != nil {
+				return err
+			}
+			smsMessage, err := d.SMSMessage(storage, index)
+			if err != nil {
+				return err
+			}
+			d.incomingSMSMessages <- smsMessage
+		} else {
+			return fmt.Errorf("unknown command: %v", out)
+		}
+	}
+	return nil
 }
 
-func (d *DefaultGSMDevice) Write(p []byte) (n int, err error) {
-	return d.socket.Write(p)
+func (d *DefaultGSMDevice) Close() error {
+	d.closed = true
+	return d.socket.Close()
 }
 
 func (d *DefaultGSMDevice) WriteString(s string) (n int, err error) {
-	return d.Write([]byte(s))
+	if d.closed {
+		return 0, errors.New("closed")
+	}
+
+	return d.socket.Write([]byte(s))
 }
 
 func (d *DefaultGSMDevice) ExecuteCommand(s string) (resp string, err error) {
+	d.executingCommand = true
+	defer func() {
+		d.executingCommand = false
+	}()
+
 	if _, err = d.WriteString(fmt.Sprintf("%s\r\n", s)); err != nil {
 		return "", err
 	}
 	out := ""
 	for {
 		buf := make([]byte, 256)
-		n, err := d.Read(buf)
+		n, err := d.socket.Read(buf)
 		if err != nil {
 			return "", err
 		}
