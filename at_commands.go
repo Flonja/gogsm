@@ -111,6 +111,33 @@ func (d *DefaultGSMDevice) SetMessageFormat(format parsing.MessageFormat) error 
 	return d.setCommand("+CMGF", fmt.Sprintf("%d", format))
 }
 
+func (d *DefaultGSMDevice) SMSMessages(storage parsing.MessageStorage, filter parsing.MessageFilter) ([]parsing.SMSMessage, error) {
+	if err := d.SetMessageFormat(parsing.TextMessageFormat); err != nil {
+		return nil, err
+	}
+	if err := d.SetCharacterSet(parsing.UCS2CharacterSet); err != nil {
+		return nil, err
+	}
+	if err := d.SetPreferredMessageStorage(storage); err != nil {
+		return nil, err
+	}
+	if err := d.setCommand("+CSDH", fmt.Sprintf("%d", 1)); err != nil {
+		return nil, err
+	}
+	messages, err := d.ExecuteCommand(fmt.Sprintf(`AT+CMGL="%v"`, filter))
+	if err != nil {
+		return nil, err
+	}
+	if len(messages) == 0 {
+		return nil, nil
+	}
+	smsMessages, err := parsing.SMSMessagesString(messages).Parsed()
+	if err != nil {
+		return nil, err
+	}
+	return smsMessages, nil
+}
+
 // Utilities:
 func (d *DefaultGSMDevice) testCommand(cmd string) error {
 	_, err := d.executeCommand(cmd, "=?")

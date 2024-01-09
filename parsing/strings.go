@@ -65,8 +65,8 @@ func (s EncodedString) ToAsciiString() (s1 EncodedString) {
 	return
 }
 
-var quotesRegex = regexp.MustCompile(`"(.*)"`)
+var quotesRegex = regexp.MustCompile(`(?m)^"?(.*?)"?$`)
 
 func (s EncodedString) RemoveQuotes() EncodedString {
-	return EncodedString(quotesRegex.ReplaceAllString(string(s), "$1"))
+	return EncodedString(strings.TrimSpace(quotesRegex.ReplaceAllString(string(s), "$1")))
 }
