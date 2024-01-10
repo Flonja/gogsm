@@ -65,6 +65,7 @@ func (s SMSMessagesString) Parsed(prefix string) (messages []SMSMessage, err err
 		} else {
 			msg.Text = string(hexString)
 		}
+		msg.Text = strings.ReplaceAll(msg.Text, "\x00", "")
 		messages = append(messages, msg)
 	}
 	return
