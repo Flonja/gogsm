@@ -10,10 +10,15 @@ import (
 	"time"
 )
 
+type IncomingSMSMessage struct {
+	SmsMessage parsing.SMSMessage
+	Storage    parsing.MessageStorage
+}
+
 type GSMDevice interface {
 	io.Closer
 
-	IncomingSMSMessage() <-chan parsing.SMSMessage
+	IncomingSMSMessage() <-chan IncomingSMSMessage
 
 	// Check sends a basic "AT" command to see if the device is operational.
 	Check() error
@@ -57,7 +62,7 @@ type GSMDevice interface {
 }
 
 func NewGSMDevice(socket io.ReadWriteCloser) (GSMDevice, error) {
-	dev := &DefaultGSMDevice{socket: socket, incomingSMSMessages: make(chan parsing.SMSMessage)}
+	dev := &DefaultGSMDevice{socket: socket, incomingSMSMessages: make(chan IncomingSMSMessage)}
 	if err := dev.Check(); err != nil {
 		return nil, err
 	}
@@ -70,7 +75,7 @@ type DefaultGSMDevice struct {
 	socket io.ReadWriteCloser
 
 	executingCommand    bool
-	incomingSMSMessages chan parsing.SMSMessage
+	incomingSMSMessages chan IncomingSMSMessage
 }
 
 func (d *DefaultGSMDevice) watch() error {
@@ -97,7 +102,7 @@ func (d *DefaultGSMDevice) watch() error {
 			if err != nil {
 				return err
 			}
-			d.incomingSMSMessages <- smsMessage
+			d.incomingSMSMessages <- IncomingSMSMessage{smsMessage, storage}
 		} else {
 			return fmt.Errorf("unknown command: %v", out)
 		}

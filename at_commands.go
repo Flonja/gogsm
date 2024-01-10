@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func (d *DefaultGSMDevice) IncomingSMSMessage() <-chan parsing.SMSMessage {
+func (d *DefaultGSMDevice) IncomingSMSMessage() <-chan IncomingSMSMessage {
 	return d.incomingSMSMessages
 }
 
