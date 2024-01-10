@@ -14,8 +14,7 @@ type SMSMessagesString string
 func (s SMSMessagesString) Parsed(prefix string) (messages []SMSMessage, err error) {
 	list := strings.Split(string(s), "\r\n")
 	for i := 0; i < len(list); i += 2 {
-		parts := strings.Split(strings.TrimPrefix(
-			strings.ReplaceAll(list[i], "\n", ""), prefix+": "), ",")
+		parts := strings.Split(strings.TrimPrefix(list[i], prefix+": "), ",")
 		msg := SMSMessage{}
 
 		msg.Index, err = strconv.Atoi(parts[0])
@@ -52,7 +51,7 @@ func (s SMSMessagesString) Parsed(prefix string) (messages []SMSMessage, err err
 		if err != nil {
 			return nil, err
 		}
-		messageText := strings.ReplaceAll(list[i+1], "\n", "")
+		messageText := list[i+1]
 		hexString, err := hex.DecodeString(messageText)
 		if err != nil {
 			return nil, err

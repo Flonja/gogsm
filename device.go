@@ -134,15 +134,14 @@ func (d *DefaultGSMDevice) ExecuteCommand(s string) (resp string, err error) {
 		if err != nil {
 			return "", err
 		}
-		out += strings.TrimSpace(string(buf[:n]))
-		if after, ok := strings.CutSuffix(out, OK); ok {
+		out += string(buf[:n])
+		if after, ok := strings.CutSuffix(strings.TrimSpace(out), OK); ok {
 			out = after
 			break
 		}
-		if after, ok := strings.CutSuffix(out, ERROR); ok {
+		if after, ok := strings.CutSuffix(strings.TrimSpace(out), ERROR); ok {
 			return "", errors.New(after)
 		}
-		out += "\n"
 	}
 	return strings.TrimSpace(out), err
 }
