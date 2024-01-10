@@ -46,10 +46,14 @@ type GSMDevice interface {
 	MessageFormat() (parsing.MessageFormat, error)
 	// SetMessageFormat sets the message format used to encode/decode SMS/MMS messages.
 	SetMessageFormat(format parsing.MessageFormat) error
-	// SMSMessages returns all messages from the provided parsing.MessageStorage with the parsing.MessageFilter.
+	// SMSMessages returns all messages from the provided parsing.MessageFilter in the parsing.MessageStorage.
 	SMSMessages(storage parsing.MessageStorage, filter parsing.MessageFilter) ([]parsing.SMSMessage, error)
-	// SMSMessage returns all messages from the provided parsing.MessageStorage with the index given.
+	// SMSMessage returns a message from the provided index in the parsing.MessageStorage.
 	SMSMessage(storage parsing.MessageStorage, index int) (parsing.SMSMessage, error)
+	// DeleteAllSMSMessages deletes all messages with the provided parsing.MessageDeleteFilter in the parsing.MessageStorage.
+	DeleteAllSMSMessages(storage parsing.MessageStorage, filter parsing.MessageDeleteFilter) error
+	// DeleteSMSMessage deletes a message with the provided index in the parsing.MessageStorage.
+	DeleteSMSMessage(storage parsing.MessageStorage, index int) error
 }
 
 func NewGSMDevice(socket io.ReadWriteCloser) (GSMDevice, error) {

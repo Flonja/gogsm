@@ -163,10 +163,21 @@ func (d *DefaultGSMDevice) setupSMSMessages(storage parsing.MessageStorage) erro
 	if err := d.SetPreferredMessageStorage(storage); err != nil {
 		return err
 	}
-	if err := d.setCommand("+CSDH", fmt.Sprintf("%d", 1)); err != nil {
+	return d.setCommand("+CSDH", fmt.Sprintf("%d", 1))
+}
+
+func (d *DefaultGSMDevice) DeleteAllSMSMessages(storage parsing.MessageStorage, filter parsing.MessageDeleteFilter) error {
+	if err := d.SetPreferredMessageStorage(storage); err != nil {
 		return err
 	}
-	return nil
+	return d.setCommand("+CMGD", fmt.Sprintf("%d,%d", 0, filter))
+}
+
+func (d *DefaultGSMDevice) DeleteSMSMessage(storage parsing.MessageStorage, index int) error {
+	if err := d.SetPreferredMessageStorage(storage); err != nil {
+		return err
+	}
+	return d.setCommand("+CMGD", fmt.Sprintf("%d", index))
 }
 
 // Utilities:

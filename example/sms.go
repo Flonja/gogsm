@@ -25,6 +25,10 @@ func main() {
 		fmt.Printf("Incoming SMS message from %v (%v): Sent at %v\n", msg.Sender, msg.PhoneNumberType, msg.Time.Format(time.DateTime))
 		fmt.Println(msg.Text)
 		fmt.Println()
+		if err := gsmDevice.DeleteSMSMessage(parsing.SimMessageStorage, msg.Index); err != nil {
+			return
+		}
+		fmt.Printf("Successfully deleted this message.")
 		return
 	}
 }
