@@ -38,3 +38,9 @@ func MessageStorageFromString(s string) MessageStorage {
 	}
 	panic(fmt.Errorf("unknown message storage: %v", s))
 }
+
+type MessageStorageUsage struct {
+	Current     MessageStorage
+	UsedSpace   int
+	MaxMessages int
+}

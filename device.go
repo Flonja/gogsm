@@ -47,6 +47,8 @@ type GSMDevice interface {
 	NetworkOperator() (string, error)
 	// SetPreferredMessageStorage sets the preferred message storage for incoming SMS/MMS messages.
 	SetPreferredMessageStorage(storage parsing.MessageStorage) error
+	// MessageStorageAndUsage returns the preferred message storage, used up space and maximum space allowed for incoming SMS/MMS messages.
+	MessageStorageAndUsage() (parsing.MessageStorageUsage, error)
 	// MessageFormat returns the message format used to encode/decode SMS/MMS messages.
 	MessageFormat() (parsing.MessageFormat, error)
 	// SetMessageFormat sets the message format used to encode/decode SMS/MMS messages.

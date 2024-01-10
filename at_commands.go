@@ -100,6 +100,23 @@ func (d *DefaultGSMDevice) SetPreferredMessageStorage(storage parsing.MessageSto
 	return d.setCommand("+CPMS", fmt.Sprintf(`"%s","%s","%s"`, storage, parsing.SimMessageStorage, parsing.SimMessageStorage))
 }
 
+func (d *DefaultGSMDevice) MessageStorageAndUsage() (parsing.MessageStorageUsage, error) {
+	usage, err := d.getCommand("+CPMS")
+	if err != nil {
+		return parsing.MessageStorageUsage{}, err
+	}
+	params := strings.Split(usage, ",")
+	used, err := strconv.Atoi(params[1])
+	if err != nil {
+		return parsing.MessageStorageUsage{}, err
+	}
+	maxMessages, err := strconv.Atoi(params[1])
+	if err != nil {
+		return parsing.MessageStorageUsage{}, err
+	}
+	return parsing.MessageStorageUsage{Current: parsing.MessageStorageFromString(params[0]), UsedSpace: used, MaxMessages: maxMessages}, nil
+}
+
 func (d *DefaultGSMDevice) MessageFormat() (parsing.MessageFormat, error) {
 	messageFormatRaw, err := d.getCommand("+CMGF")
 	if err != nil {
